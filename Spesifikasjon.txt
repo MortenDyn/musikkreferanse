@@ -1,0 +1,9 @@
+1. Liste over alle komponister i alle sjangre
+- Barokken, Wienerklassisimen, Romantikken osv.
+2. Sentrale verker for denne komponisten
+3. Mulighet for å spille den første komposisjonen på lista for hver komponist i sekvens
+4. Velge komponist og klipp slik det er nå
+5. Velge type verk som skal spilles (KLaver, orkester, opera osv)
+6. Lage mobilapp
+7. Ta bilde av en tekst som inneholder et konsertprogram el. og få spilt av musikk-klipp
+8. Hvis musikken er fra en film, konsertopptak, Opera/teater el lignende som er innspilt på film, se om det er mulig på spille av film-klippet

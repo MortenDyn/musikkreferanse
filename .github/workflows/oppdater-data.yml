@@ -1,0 +1,40 @@
+# Henter nye data hver mandag og publiserer dem på GitHub Pages (som serverer docs/).
+# Bruker ingen KI og ingen tokens. YouTube-nøkkelen ligger i Settings > Secrets > YOUTUBE_API_KEY.
+name: Oppdater data
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+    inputs:
+      fane:
+        description: "Bare disse fanene (kommaseparert, tomt = alle)"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: oppdater-data
+  cancel-in-progress: false
+
+jobs:
+  bygg:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Hent data
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: node scripts/bygg-data.mjs ${{ inputs.fane && format('--fane {0}', inputs.fane) || '' }}
+      - name: Lagre endringer
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898900+github-actions[bot]@users.noreply.github.com"
+          git add docs/data cache
+          git diff --cached --quiet || git commit -m "Oppdater musikkdata"
+          git push

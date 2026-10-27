@@ -1,0 +1,9 @@
+{
+  "name": "lyttestasjon",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "data": "node scripts/bygg-data.mjs",
+    "serve": "node scripts/serve.mjs"
+  }
+}

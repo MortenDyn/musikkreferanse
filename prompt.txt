@@ -1,0 +1,8 @@
+Jeg ønsker å lage et system der jeg kan få brukt funksjonaliteten til websiden som allerede er laget her. 
+Det er fint sånn som den er nå, men fanen med epoker blir litt overlapp med noen av de andre fanene. Del heller den opp  slik at alt blir entydig.
+I tillegg ønsker jeg å få mulighet for å spille den første komposisjonen på lista for hver komponist i sekvens
+Jeg vil også ha mulighet til å velge hvilken type verk som skal listes ut (klaver, orkester, opera osv)
+Hvis musikken er fra en film, konsertopptak, Opera/teater el lignende som er innspilt på film, se om det er mulig på spille av film-klippet
+Jeg trenger en agent som henter data via api og som kan distribuere data videre til en webside og evt til en mobil
+Det er viktig at det brukes ferrest mulig token under kjøring
+Hvis noe er uklart så spør
