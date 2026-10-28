@@ -1,6 +1,6 @@
-// Appskallet hentes fra cache; data hentes fra nett først og faller tilbake til cache offline.
+// Alt hentes fra nett først, så nye versjoner vises med én gang; cachen brukes bare offline.
 // Lydklipp og video lagres ikke.
-const VERSION = "v3";
+const VERSION = "v4";
 const SHELL = ["./", "index.html", "style.css", "app.js", "skann.js", "manifest.webmanifest", "icons/icon.svg"];
 
 self.addEventListener("install", e => {
@@ -14,13 +14,12 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET" || url.origin !== location.origin) return;
-  if (url.pathname.includes("/data/")) {
-    e.respondWith(fetch(e.request).then(res => {
+  // no-cache: spør serveren om filen er endret i stedet for å stole på nettleserens HTTP-cache (GitHub Pages: 10 min)
+  e.respondWith(fetch(url.href, { cache: "no-cache" }).then(res => {
+    if (res.ok) {
       const copy = res.clone();
       caches.open(VERSION).then(c => c.put(e.request, copy));
-      return res;
-    }).catch(() => caches.match(e.request)));
-    return;
-  }
-  e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request)));
+    }
+    return res;
+  }).catch(() => caches.match(e.request, { ignoreSearch: true })));
 });
