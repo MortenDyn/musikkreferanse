@@ -51,3 +51,22 @@ Rediger `scripts/lister.mjs` og kjør scriptet, eller kjør workflowen *Oppdater
 ## På mobil
 
 Åpne nettadressen i Safari (iPhone) eller Chrome (Android) og velg **Legg til på Hjem-skjerm**.
+
+Du trenger ingen kommando for å bruke appen. Den ligger på nett, så du åpner bare https://mortendyn.github.io/musikkreferanse/ i nettleseren. Det gjelder både på PC og iPhone.
+
+Kommandoen trengs bare hvis du vil kjøre appen lokalt fra filene på PC-en, for eksempel for å teste endringer før de publiseres. Kjør den fra prosjektmappen:
+
+```powershell
+node scripts/serve.mjs
+```
+
+Åpne deretter http://localhost:8080 i nettleseren. Trykk **Ctrl + C** i terminalen for å stoppe serveren.
+
+Andre kommandoer i prosjektet:
+
+| Kommando | Hva den gjør |
+| --- | --- |
+| `node scripts/bygg-data.mjs` | Henter nye data (verk, lydklipp, videoer) for alle faner |
+| `node scripts/bygg-data.mjs --fane barokk` | Henter data for bare én fane |
+
+Datahentingen kjøres uansett automatisk på GitHub hver mandag, så du trenger sjelden å gjøre den selv.
