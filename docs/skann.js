@@ -6,15 +6,6 @@ const TESSERACT = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesserac
 const FULL_NAME_TABS = new Set(["world", "elektronisk"]);
 // Etternavn som også er vanlige ord eller navn; krever fornavn eller initial i samme linje
 const COMMON = new Set(["john", "fine", "hall", "berlin", "shaw", "glass", "cage", "adams", "williams", "diamond", "berger", "carter", "herman", "porter", "brown", "barry", "shore", "berg", "lopez", "kitt", "levi", "ross", "paul", "bock", "kern", "rota", "lambert", "styne"]);
-// Stavemåter som avviker for mye til å fanges av feiltoleransen
-const ALIAS = {
-  tsjajkovskij: ["tchaikovsky", "tschaikowsky", "tsjaikovskij", "tchaikovski"],
-  sjostakovitsj: ["shostakovich", "schostakowitsch", "chostakovitch"],
-  rakhmaninov: ["rachmaninoff", "rachmaninow"],
-  prokofjev: ["prokofiev", "prokofieff", "prokofjew"],
-  stravinskij: ["stravinsky", "strawinsky"],
-  handel: ["haendel"],
-};
 // Norske og tyske verkbetegnelser oversettes til engelsk, som er språket i iTunes og Open Opus
 const TERMS = [
   [/\b(klaver|klavier|piano)(konsert|konzert)\b/g, "piano concerto"],

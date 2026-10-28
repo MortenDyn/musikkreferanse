@@ -1,6 +1,6 @@
 // Appskallet hentes fra cache; data hentes fra nett først og faller tilbake til cache offline.
 // Lydklipp og video lagres ikke.
-const VERSION = "v2";
+const VERSION = "v3";
 const SHELL = ["./", "index.html", "style.css", "app.js", "skann.js", "manifest.webmanifest", "icons/icon.svg"];
 
 self.addEventListener("install", e => {

@@ -13,6 +13,17 @@ const norm = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const tracksOf = item => (item.tracks || []).filter(t => !typeFilter || t.g === typeFilter);
 const typeName = g => (INDEX.typer || {})[g] || g;
+// Andre stavemåter av etternavn, så søk og skanning finner «Tchaikovsky» og «Rachmaninoff»
+const ALIAS = {
+  tsjajkovskij: ["tchaikovsky", "tschaikowsky", "tsjaikovskij", "tchaikovski"],
+  sjostakovitsj: ["shostakovich", "schostakowitsch", "chostakovitch"],
+  rakhmaninov: ["rachmaninoff", "rachmaninow"],
+  prokofjev: ["prokofiev", "prokofieff", "prokofjew"],
+  stravinskij: ["stravinsky", "strawinsky"],
+  handel: ["haendel"],
+};
+const surname = n => norm(n.replace(/\([^)]*\)/g, "")).split(/[^a-z0-9æø]+/).filter(Boolean).pop() || "";
+const matchesQuery = (it, f) => norm([it.n, it.l, it.m, ...(ALIAS[surname(it.n)] || [])].join(" ")).includes(f);
 
 async function loadTab(id) {
   if (!tabData.has(id)) {
@@ -66,10 +77,10 @@ async function setTab(id, openId) {
 
 function visibleIdxs() {
   const data = tabData.get(activeTab);
-  const f = norm($("filter").value);
+  const f = norm($("filter").value.trim());
   return data.items.map((it, i) => {
     if (it.h) return -1;
-    if (f && !norm(it.n + " " + it.l + " " + it.m).includes(f)) return -1;
+    if (f && !matchesQuery(it, f)) return -1;
     if (typeFilter && !tracksOf(it).length) return -1;
     return i;
   }).filter(i => i >= 0);
@@ -91,16 +102,48 @@ function renderList() {
       return;
     }
     if (!show.has(idx)) return;
-    const n = tracksOf(it).length;
-    const b = el("button");
+    const b = composerButton(it, it.l + (it.m ? " · " + it.m : ""), () => { stopSequence(); openComposer(activeTab, idx, true); });
     if (current && current.tab === activeTab && current.idx === idx) b.setAttribute("aria-current", "true");
-    b.append(el("span", "cname", it.n), el("span", "cstat" + (n ? "" : " none"), n ? n + " klipp" : "ingen"), el("span", "cmeta", it.l + (it.m ? " · " + it.m : "")));
-    b.addEventListener("click", () => { stopSequence(); openComposer(activeTab, idx, true); });
-    const li = el("li");
-    li.appendChild(b);
-    ul.appendChild(li);
+    ul.appendChild(b.parentNode);
   });
-  if (!ul.children.length) ul.appendChild(el("li", "era", "Ingen treff."));
+  // Søket gjelder alle faner; treff utenfor fanen som er åpen vises under
+  const f = norm($("filter").value.trim());
+  const others = f.length >= 2 ? otherTabHits(f) : [];
+  if (!ul.children.length && !others.length) ul.appendChild(el("li", "era", "Ingen treff."));
+  if (others.length) {
+    const h = el("li", "ghead");
+    h.append(el("span", null, "I andre faner"), el("small", null, others.length + " treff"));
+    ul.appendChild(h);
+    for (const { fane, idx, it } of others) {
+      ul.appendChild(composerButton(it, fane.label + " · " + it.l, async () => {
+        stopSequence();
+        await setTab(fane.id);
+        openComposer(fane.id, idx, true);
+        if (matchMedia("(max-width: 760px)").matches) $("stage").scrollIntoView({ behavior: "smooth", block: "start" });
+      }).parentNode);
+    }
+  }
+}
+
+function composerButton(it, meta, onClick) {
+  const n = tracksOf(it).length;
+  const b = el("button");
+  b.append(el("span", "cname", it.n), el("span", "cstat" + (n ? "" : " none"), n ? n + " klipp" : "ingen"), el("span", "cmeta", meta));
+  b.addEventListener("click", onClick);
+  el("li").appendChild(b);
+  return b;
+}
+
+// Første søk laster alle fanene; listen tegnes på nytt når de er klare
+let allTabs = null;
+function otherTabHits(f) {
+  if (!allTabs) allTabs = Promise.all(INDEX.faner.map(x => loadTab(x.id))).then(renderList);
+  const hits = [];
+  for (const fane of INDEX.faner) {
+    if (fane.id === activeTab || !tabData.has(fane.id)) continue;
+    tabData.get(fane.id).items.forEach((it, idx) => { if (!it.h && matchesQuery(it, f)) hits.push({ fane, idx, it }); });
+  }
+  return hits.slice(0, 30);
 }
 
 // ---------- Scenen ----------
@@ -290,6 +333,16 @@ $("random").addEventListener("click", () => {
   openComposer(activeTab, idxs[Math.floor(Math.random() * idxs.length)], true);
 });
 $("filter").addEventListener("input", renderList);
+// Enter spiller første treff og lukker tastaturet på mobil
+$("filter").addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  const first = $("list").querySelector("button");
+  if (!first) return;
+  e.preventDefault();
+  e.target.blur();
+  first.click();
+  if (matchMedia("(max-width: 760px)").matches) $("stage").scrollIntoView({ behavior: "smooth", block: "start" });
+});
 $("type").addEventListener("change", e => {
   typeFilter = e.target.value;
   renderList();
