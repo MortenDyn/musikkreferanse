@@ -109,3 +109,17 @@ ul.list button[aria-current="true"] { background: var(--bg); box-shadow: inset 3
 @media (max-width: 520px) { .player a { display: none; } .pinner { grid-template-columns: auto 1fr; } }
 @media (prefers-reduced-motion: no-preference) { .bar i { transition: width .25s linear; } }
 footer { font-size: 12px; color: var(--muted); }
+/* Skann program */
+.vh { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.scanpick { display: grid; gap: 6px; justify-items: start; }
+.scanpick label { cursor: pointer; }
+.stage textarea { width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); font: 14px/1.5 var(--mono); resize: vertical; margin-bottom: 8px; }
+.scanout { display: grid; gap: 18px; justify-items: stretch; }
+.scanout > .btn { justify-self: start; }
+.piece { display: grid; gap: 8px; padding-top: 16px; border-top: 1px solid var(--line); }
+.plink { justify-self: start; background: none; border: 0; padding: 0; font: 500 24px/1.15 var(--display); color: var(--ink); text-align: left; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; }
+.plink:hover { text-decoration-color: var(--accent); }
+.pwork { color: var(--muted); }
+.ylink, .loose summary { color: var(--accent); font-size: 13px; }
+.loose summary { cursor: pointer; margin-bottom: 8px; }
+.loose .tracks { margin-top: 10px; }

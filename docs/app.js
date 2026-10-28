@@ -136,18 +136,7 @@ function openComposer(tab, idx, autoplay) {
 
   if (item.video && item.video.length) {
     const sec = el("section");
-    sec.appendChild(el("h3", null, "Video"));
-    const grid = el("div", "videos");
-    for (const v of item.video) {
-      const b = el("button", "vthumb");
-      const img = el("img");
-      img.alt = ""; img.loading = "lazy";
-      img.src = "https://i.ytimg.com/vi/" + v.id + "/mqdefault.jpg";
-      b.append(img, el("span", null, v.t));
-      b.addEventListener("click", () => showVideo(v));
-      grid.appendChild(b);
-    }
-    sec.appendChild(grid);
+    sec.append(el("h3", null, "Video"), videoGrid(item.video));
     stage.appendChild(sec);
   }
 
@@ -160,21 +149,38 @@ function openComposer(tab, idx, autoplay) {
   const sec = el("section");
   sec.appendChild(el("h3", null, "Klipp"));
   const wrap = el("div", "tracks");
-  tracks.forEach((t, i) => {
-    const b = el("button", "track");
-    b.dataset.i = i;
-    const img = el("img");
-    img.alt = ""; img.loading = "lazy"; img.src = t.i || "";
-    const info = el("div", "tinfo");
-    info.append(el("div", "ttitle", t.t), el("div", "tsub", [t.a, t.c, t.y].filter(Boolean).join(" · ")));
-    b.append(img, info, el("span", "tag", typeName(t.g)));
-    b.addEventListener("click", () => { stopSequence(); playList(tracks.map(tr => ({ tr, tab, idx })), i); });
-    wrap.appendChild(b);
-  });
+  tracks.forEach((t, i) => wrap.appendChild(trackButton(t, () => { stopSequence(); playList(tracks.map(tr => ({ tr, tab, idx })), i); })));
   sec.appendChild(wrap);
   stage.appendChild(sec);
   if (autoplay) playList(tracks.map(tr => ({ tr, tab, idx })), 0);
   else markPlaying();
+}
+
+function trackButton(t, onClick) {
+  const b = el("button", "track");
+  b._tr = t;
+  const img = el("img");
+  img.alt = ""; img.loading = "lazy"; img.src = t.i || "";
+  const info = el("div", "tinfo");
+  info.append(el("div", "ttitle", t.t), el("div", "tsub", [t.a, t.c, t.y].filter(Boolean).join(" · ")));
+  b.append(img, info);
+  if (t.g) b.appendChild(el("span", "tag", typeName(t.g)));
+  b.addEventListener("click", onClick);
+  return b;
+}
+
+function videoGrid(videos) {
+  const grid = el("div", "videos");
+  for (const v of videos) {
+    const b = el("button", "vthumb");
+    const img = el("img");
+    img.alt = ""; img.loading = "lazy";
+    img.src = "https://i.ytimg.com/vi/" + v.id + "/mqdefault.jpg";
+    b.append(img, el("span", null, v.t));
+    b.addEventListener("click", () => showVideo(v));
+    grid.appendChild(b);
+  }
+  return grid;
 }
 
 function showVideo(v) {
@@ -207,18 +213,19 @@ function playList(list, i) {
 function playAt(i) {
   if (!queue.length) return;
   qi = (i + queue.length) % queue.length;
-  const { tr, tab, idx } = queue[qi];
+  // Skannede linjer uten kjent komponist har bare et navn (who), ingen fane
+  const { tr, tab, idx, who: label } = queue[qi];
   $("stage").querySelector(".vbox")?.remove();
   audio.src = tr.p;
   audio.play().catch(() => {});
-  const who = tabData.get(tab).items[idx].n;
+  const who = label || tabData.get(tab).items[idx].n;
   $("nowTitle").textContent = tr.t;
   $("nowSub").textContent = (seqMode ? who + " · " : "") + tr.a;
   const link = $("nowLink");
   link.href = tr.u || "#";
   link.hidden = !tr.u;
   // I sekvensmodus følger scenen med til neste komponist
-  if (seqMode && (!current || current.tab !== tab || current.idx !== idx)) openComposer(tab, idx, false);
+  if (seqMode && tab && (!current || current.tab !== tab || current.idx !== idx)) openComposer(tab, idx, false);
   markPlaying();
   if ("mediaSession" in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({ title: tr.t, artist: tr.a, album: who, artwork: tr.i ? [{ src: tr.i, sizes: "100x100" }] : [] });
@@ -227,10 +234,7 @@ function playAt(i) {
 
 function markPlaying() {
   const e = queue[qi];
-  document.querySelectorAll(".track").forEach(b => {
-    const t = current && tracksOf(tabData.get(current.tab).items[current.idx])[+b.dataset.i];
-    b.classList.toggle("playing", !!e && t === e.tr);
-  });
+  document.querySelectorAll(".track").forEach(b => b.classList.toggle("playing", !!e && b._tr === e.tr));
 }
 
 async function startSequence() {

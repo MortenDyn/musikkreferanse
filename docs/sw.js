@@ -1,7 +1,7 @@
 // Appskallet hentes fra cache; data hentes fra nett først og faller tilbake til cache offline.
 // Lydklipp og video lagres ikke.
-const VERSION = "v1";
-const SHELL = ["./", "index.html", "style.css", "app.js", "manifest.webmanifest", "icons/icon.svg"];
+const VERSION = "v2";
+const SHELL = ["./", "index.html", "style.css", "app.js", "skann.js", "manifest.webmanifest", "icons/icon.svg"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
